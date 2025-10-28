@@ -1,0 +1,13 @@
+[
+  {
+    "id": 2,
+    "title": "Teclado Mecánico",
+    "description": "Switch rojo, retroiluminado",
+    "code": "TEC001",
+    "price": 89.99,
+    "status": true,
+    "stock": 15,
+    "category": "Periféricos",
+    "thumbnails": []
+  }
+]
