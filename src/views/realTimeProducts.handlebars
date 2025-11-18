@@ -1,0 +1,104 @@
+<h1 class="mb-4">Productos en Tiempo Real</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Agregar Producto</h5>
+            </div>
+            <div class="card-body">
+                <form id="addProductForm">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" placeholder="Título" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <textarea class="form-control" placeholder="Descripción" name="description" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" placeholder="Código" name="code" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="number" class="form-control" placeholder="Precio" name="price" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="number" class="form-control" placeholder="Stock" name="stock" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" placeholder="Categoría" name="category" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Agregar Producto</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div id="productsList" class="row">
+            {{#each products}}
+            <div class="col-md-6 mb-3" id="product-{{this.id}}">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{this.title}}</h5>
+                        <p class="card-text">{{this.description}}</p>
+                        <p class="card-text"><strong>${{this.price}}</strong></p>
+                        <p class="card-text">Stock: {{this.stock}}</p>
+                        <button class="btn btn-danger btn-sm" onclick="deleteProduct({{this.id}})">Eliminar</button>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+    
+    socket.on('productsUpdated', (products) => {
+        updateProductsList(products);
+    });
+    
+    document.getElementById('addProductForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const product = {
+            title: formData.get('title'),
+            description: formData.get('description'),
+            code: formData.get('code'),
+            price: parseFloat(formData.get('price')),
+            stock: parseInt(formData.get('stock')),
+            category: formData.get('category'),
+            status: true
+        };
+        
+        socket.emit('addProduct', product);
+        e.target.reset();
+    });
+    
+    function deleteProduct(productId) {
+        socket.emit('deleteProduct', productId);
+    }
+    
+    function updateProductsList(products) {
+        const productsList = document.getElementById('productsList');
+        productsList.innerHTML = '';
+        
+        products.forEach(product => {
+            const productElement = `
+                <div class="col-md-6 mb-3" id="product-${product.id}">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">${product.title}</h5>
+                            <p class="card-text">${product.description}</p>
+                            <p class="card-text"><strong>$${product.price}</strong></p>
+                            <p class="card-text">Stock: ${product.stock}</p>
+                            <button class="btn btn-danger btn-sm" onclick="deleteProduct(${product.id})">Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            productsList.innerHTML += productElement;
+        });
+    }
+</script>

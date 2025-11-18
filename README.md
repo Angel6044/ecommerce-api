@@ -11,6 +11,7 @@ API RESTful para gestión de **productos** y **carritos de compra**, con persist
 
 
 ## Estructura del Proyecto
+
 ```
 ecommerce-api/
 ├── src/
@@ -29,7 +30,6 @@ ecommerce-api/
 ├── README.md
 └── .gitignore
 ```
-
 
 ## Instalación
 
@@ -203,3 +203,67 @@ Respuesta:
   }
 ]
 ```
+
+## ACTUALIZACION: Segunda Entrega
+
+## Estructura del Proyecto
+
+```
+ecommerce-api/
+├── src/
+│   ├── data/
+│   │   ├── products.json
+│   │   └── carts.json
+│   ├── managers/
+│   │   ├── ProductManager.js
+│   │   └── CartManager.js
+│   ├── routes/
+│   │   ├── products.router.js
+│   │   ├── carts.router.js
+│   │   └── views.router.js               <-- Nuevo 
+│   ├── views/
+│   │   ├── layouts/
+│   │   │   └── main.handlebars           <-- Nuevo
+│   │   ├── home.handlebars               <-- Nuevo
+│   │   └── realTimeProducts.handlebars   <-- Nuevo  
+│   ├── public/
+│   └── utils.js                          <-- Nuevo
+├── server.js                             <-- Actualizado
+└── package.json                          <-- Actualizado
+```
+
+### **En server.js:**
+
+| Cambio                | Tipo                | Propósito                  |
+| --------------------- | ------------------- | -------------------------- |
+| `express-handlebars`  | Import nuevo        | Motor de plantillas        |
+| `http.createServer()` | Configuración nueva | Servidor para WebSockets   |
+| `Socket.io`           | Configuración nueva | Comunicación tiempo real   |
+| Handlebars config     | Configuración nueva | Renderizar vistas          |
+| Ruta `/`              | Ruta nueva          | Servir vistas Handlebars   |
+| Eventos WebSocket     | Lógica nueva        | Comunicación bidireccional |
+
+### **En package.json:**
+
+**DEPENDENCIAS AGREGADAS:**
+
+**1. express-handlebars: ^7.1.2**
+
+    Propósito: Motor de plantillas para renderizar vistas HTML
+  
+    Función: Convertir archivos .handlebars en HTML renderizado
+
+    Uso: En server.js con app.engine('handlebars', engine())
+
+**2. socket.io: ^4.7.5**
+
+    Propósito: Comunicación en tiempo real entre cliente y servidor
+
+    Función: WebSockets para actualizaciones automáticas
+
+    Uso: En server.js con new Server(httpServer)
+
+Para agregar estas dependencias, ejecutar:
+
+`npm install express-handlebars socket.io`
+
