@@ -267,3 +267,269 @@ Para agregar estas dependencias, ejecutar:
 
 `npm install express-handlebars socket.io`
 
+## ACTUALIZACION: Tercera Entrega
+
+API de ecommerce desarrollada con Node.js, Express, MongoDB y Handlebars que implementa un sistema completo de productos y carritos de compras con gestión de sesiones, paginación, filtros y WebSockets.
+
+## Estructura del Proyecto
+
+```
+ecommerce-api/
+├── src/
+│   ├── config/
+│   │   ├── database.js          # Configuración MongoDB
+│   │   └── seed.js              # Datos de prueba
+│   ├── models/
+│   │   ├── Product.js           # Modelo Producto
+│   │   └── Cart.js              # Modelo Carrito
+│   ├── managers/
+│   │   ├── ProductManager.js    # Lógica de productos
+│   │   └── CartManager.js       # Lógica de carritos
+│   ├── routes/
+│   │   ├── products.router.js   # Rutas API productos
+│   │   ├── carts.router.js      # Rutas API carritos
+│   │   └── views.router.js      # Rutas vistas Handlebars
+│   ├── views/
+│   │   ├── layouts/
+│   │   │   └── main.handlebars  # Layout principal
+│   │   ├── home.handlebars      # Página de inicio
+│   │   ├── products.handlebars  # Lista de productos
+│   │   ├── productDetail.handlebars # Detalle de producto
+│   │   ├── cart.handlebars      # Carrito de compras
+│   │   └── realTimeProducts.handlebars # Productos tiempo real
+│   ├── public/                  # Archivos estáticos
+│   └── utils.js                 # Utilidades
+├── server.js                    # Servidor principal
+└── package.json
+```
+
+## Funcionalidades Principales
+
+- Gestión de productos con CRUD completo
+- Carritos por sesión (cada usuario tiene su carrito independiente)
+- Paginación profesional con límites, ordenamiento y filtros
+- Vistas dinámicas con Handlebars
+- Tiempo real con Socket.io
+- Persistencia con MongoDB
+- Gestión de sesiones con express-session
+
+## Tecnologías Utilizadas
+
+| Tecnología      | Versión  | Propósito                   |
+| --------------- | -------- | --------------------------- |
+| Node.js         | >=20.0.0 | Runtime JavaScript          |
+| Express.js      | ^4.18.2  | Framework web               |
+| MongoDB         | -        | Base de datos NoSQL         |
+| Mongoose        | ^8.0.3   | ODM para MongoDB            |
+| Handlebars      | ^7.1.3   | Motor de plantillas         |
+| Socket.io       | ^4.8.1   | Comunicación en tiempo real |
+| Express-session | ^1.17.3  | Gestión de sesiones         |
+| Bootstrap       | 5.3.0    | Framework CSS               |
+
+## Endpoints de la API
+
+### 📦 Productos
+
+|Método|Endpoint|Descripción|
+|---|---|---|
+|`GET`|`/api/products`|Obtener productos (con paginación)|
+|`GET`|`/api/products/:pid`|Obtener producto por ID|
+|`POST`|`/api/products`|Crear nuevo producto|
+|`PUT`|`/api/products/:pid`|Actualizar producto|
+|`DELETE`|`/api/products/:pid`|Eliminar producto|
+
+### 🛒 Carritos
+
+|Método|Endpoint|Descripción|
+|---|---|---|
+|`POST`|`/api/carts`|Crear nuevo carrito|
+|`GET`|`/api/carts/:cid`|Obtener carrito por ID|
+|`POST`|`/api/carts/:cid/product/:pid`|Agregar producto al carrito|
+|`DELETE`|`/api/carts/:cid/products/:pid`|Eliminar producto del carrito|
+|`PUT`|`/api/carts/:cid`|Actualizar todos los productos|
+|`PUT`|`/api/carts/:cid/products/:pid`|Actualizar cantidad de producto|
+|`DELETE`|`/api/carts/:cid`|Vaciar carrito|
+
+### 🌐 Vistas
+
+| Ruta                | Descripción                                |
+| ------------------- | ------------------------------------------ |
+| `/`                 | Página de inicio con productos destacados  |
+| `/products`         | Lista completa de productos con paginación |
+| `/products/:pid`    | Detalle de producto individual             |
+| `/carts/my-cart`    | Carrito personal del usuario               |
+| `/realtimeproducts` | Gestión de productos en tiempo real        |
+
+## 🔧 Configuración e Instalación
+
+### 1. Prerrequisitos
+
+- Node.js >= 20.0.0
+- MongoDB local o en la nube
+- npm o yarn
+
+### 2. Instalación
+
+```
+# Clonar el proyecto
+git clone <repository-url>
+cd ecommerce-api
+
+# Instalar dependencias
+npm install
+```
+
+### 3. Configuración de MongoDB
+
+```
+// En src/config/database.js
+mongoose.connect('mongodb://localhost:27017/ecommerce', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
+```
+
+### 4. Inicializar datos de prueba
+
+```
+npm run seed
+```
+
+### 5. Ejecutar la aplicación
+
+```
+# Desarrollo
+npm run dev
+
+# Producción
+npm start
+```
+
+##  Características de Paginación
+
+### Parámetros de consulta para `/api/products`
+
+- `limit`: Número de productos por página (default: 10)
+- `page`: Página a mostrar (default: 1)
+- `sort`: Ordenamiento (`asc` o `desc` por precio)
+- `query`: Búsqueda por título, descripción o categoría
+- `category`: Filtrar por categoría específica
+- `availability`: Filtrar por disponibilidad (`true`/`false`)
+
+### Ejemplo de respuesta paginada
+
+```
+{
+  "status": "success",
+  "payload": [...],
+  "totalPages": 5,
+  "prevPage": 2,
+  "nextPage": 4,
+  "page": 3,
+  "hasPrevPage": true,
+  "hasNextPage": true,
+  "prevLink": "/api/products?page=2&limit=10",
+  "nextLink": "/api/products?page=4&limit=10"
+}
+```
+
+## Vistas y Frontend
+
+### Layout Principal (`main.handlebars`)
+
+- Navbar responsive con Bootstrap
+- Inyección de variables globales (`cartId`)    
+- Estilos y scripts comunes
+
+### Vistas Implementadas
+
+1. **Home**: Productos destacados
+2. **Products**: Lista completa con filtros y paginación
+3. **Product Detail**: Detalle individual con botón agregar al carrito
+4. **Cart**: Carrito personal con gestión de cantidades
+5. **Real Time Products**: Gestión en tiempo real con WebSockets
+
+## Gestión de Sesiones
+
+### Implementación
+
+```
+app.use(session({
+    secret: 'ecommerce-secret-key',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { 
+        secure: false,
+        maxAge: 1000 * 60 * 60 * 24 // 24 horas
+    }
+}));
+```
+### Características
+
+- **Carrito por sesión**: Cada usuario tiene su carrito independiente
+- **Persistencia**: El carrito se mantiene durante 24 horas
+- **Middleware automático**: Creación de carrito al iniciar sesión
+- **Identificación única**: Session ID como identificador
+
+## Modelos de Datos
+
+### Producto
+
+```
+{
+  title: String,        // Requerido
+  description: String,  // Requerido
+  code: String,         // Requerido, único
+  price: Number,        // Requerido, mínimo 0
+  status: Boolean,      // Default: true
+  stock: Number,        // Requerido, mínimo 0
+  category: String,     // Requerido
+  thumbnails: [String]  // Array de URLs
+}
+```
+### Carrito
+
+```
+{
+  products: [{
+    product: ObjectId,  // Referencia a Product
+    quantity: Number    // Mínimo 1, default: 1
+  }]
+}
+```
+
+## URLs de la Aplicación
+
+- **Aplicación**: [http://localhost:8080](http://localhost:8080/)
+- **API Products**: [http://localhost:8080/api/products](http://localhost:8080/api/products)
+- **API Carts**: [http://localhost:8080/api/carts](http://localhost:8080/api/carts)
+- **Mi Carrito**: [http://localhost:8080/carts/my-cart](http://localhost:8080/carts/my-cart)
+- **Productos Tiempo Real**: [http://localhost:8080/realtimeproducts](http://localhost:8080/realtimeproducts)
+
+## Características Destacadas
+
+### ✅ Implementadas
+
+- Paginación profesional con metadata completa
+- Filtros por categoría y disponibilidad
+- Ordenamiento ascendente/descendente por precio
+- Búsqueda por texto en título, descripción y categoría
+- Gestión completa de carritos (CRUD)
+- Carritos por sesión de usuario
+- Vistas responsivas con Bootstrap
+- WebSockets para tiempo real
+- Validaciones de datos
+- Manejo de errores
+
+### 🔮 Posibles Mejoras Futuras
+
+- Sistema de autenticación de usuarios
+- Roles y permisos (admin/user)
+- Pasarela de pagos
+- Sistema de órdenes/pedidos
+- Notificaciones por email
+- Dashboard administrativo
+- Tests automatizados
+- Dockerización
+- Deployment en la nube
+

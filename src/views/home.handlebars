@@ -1,24 +1,76 @@
-<h1 class="mb-4">Productos</h1>
+<h1 class="mb-4">Productos Destacados</h1>
 
 {{#if products.length}}
 <div class="row">
     {{#each products}}
     <div class="col-md-4 mb-4">
-        <div class="card">
+        <div class="card h-100">
             <div class="card-body">
                 <h5 class="card-title">{{this.title}}</h5>
-                <p class="card-text">{{this.description}}</p>
+                <p class="card-text text-muted">{{this.description}}</p>
                 <p class="card-text"><strong>Precio: ${{this.price}}</strong></p>
-                <p class="card-text">Stock: {{this.stock}}</p>
+                <p class="card-text">
+                    Stock: {{this.stock}}
+                    <span class="badge {{#if this.status}}bg-success{{else}}bg-danger{{/if}} ms-2">
+                        {{#if this.status}}Disponible{{else}}No disponible{{/if}}
+                    </span>
+                </p>
                 <p class="card-text">Categoría: {{this.category}}</p>
-                <p class="card-text"><small class="text-muted">Código: {{this.code}}</small></p>
+            </div>
+            <div class="card-footer">
+                <div class="d-grid gap-2">
+                    <a href="/products/{{this._id}}" class="btn btn-outline-primary">Ver detalles</a>
+                    <button class="btn btn-success add-to-cart" data-product-id="{{this._id}}">
+                        Agregar al carrito
+                    </button>
+                </div>
             </div>
         </div>
     </div>
     {{/each}}
 </div>
+
+<div class="text-center mt-4">
+    <a href="/products" class="btn btn-primary btn-lg">Ver todos los productos</a>
+</div>
+
 {{else}}
-<div class="alert alert-warning" role="alert">
+<div class="alert alert-warning text-center" role="alert">
     No hay productos disponibles.
 </div>
 {{/if}}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', async function() {
+            const productId = this.getAttribute('data-product-id');
+            
+            try {
+                // Usar el cartId de la sesión
+                const cartId = '{{cartId}}'; // Esto viene del servidor
+                
+                if (!cartId) {
+                    alert('Error: No se pudo identificar tu carrito');
+                    return;
+                }
+
+                const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    alert('Producto agregado al carrito');
+                } else {
+                    const errorData = await response.json();
+                    alert('Error: ' + errorData.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al agregar producto al carrito');
+            }
+        });
+    });
+
+});
+</script>

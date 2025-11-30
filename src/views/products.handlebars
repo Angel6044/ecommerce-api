@@ -1,0 +1,150 @@
+<h1 class="mb-4">Productos</h1>
+
+<!-- Filtros y ordenamiento -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form id="filterForm" class="row g-3">
+            <div class="col-md-3">
+                <label for="query" class="form-label">Buscar</label>
+                <input type="text" class="form-control" id="query" name="query" 
+                       value="{{queryParams.query}}" placeholder="Título, descripción o categoría">
+            </div>
+            <div class="col-md-2">
+                <label for="category" class="form-label">Categoría</label>
+                <input type="text" class="form-control" id="category" name="category" 
+                       value="{{queryParams.category}}" placeholder="Categoría">
+            </div>
+            <div class="col-md-2">
+                <label for="availability" class="form-label">Disponibilidad</label>
+                <select class="form-select" id="availability" name="availability">
+                    <option value="">Todas</option>
+                    <option value="true" {{#if (eq queryParams.availability 'true')}}selected{{/if}}>Disponible</option>
+                    <option value="false" {{#if (eq queryParams.availability 'false')}}selected{{/if}}>No disponible</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="sort" class="form-label">Ordenar por precio</label>
+                <select class="form-select" id="sort" name="sort">
+                    <option value="">Sin orden</option>
+                    <option value="asc" {{#if (eq queryParams.sort 'asc')}}selected{{/if}}>Menor a mayor</option>
+                    <option value="desc" {{#if (eq queryParams.sort 'desc')}}selected{{/if}}>Mayor a menor</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="limit" class="form-label">Productos por página</label>
+                <select class="form-select" id="limit" name="limit">
+                    <option value="5" {{#if (eq queryParams.limit '5')}}selected{{/if}}>5</option>
+                    <option value="10" {{#if (eq queryParams.limit '10')}}selected{{/if}}>10</option>
+                    <option value="20" {{#if (eq queryParams.limit '20')}}selected{{/if}}>20</option>
+                </select>
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de productos -->
+{{#if products.length}}
+<div class="row">
+    {{#each products}}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{this.title}}</h5>
+                <p class="card-text text-muted">{{this.description}}</p>
+                <p class="card-text"><strong>Precio: ${{this.price}}</strong></p>
+                <p class="card-text">
+                    Stock: {{this.stock}}
+                    <span class="badge {{#if this.status}}bg-success{{else}}bg-danger{{/if}} ms-2">
+                        {{#if this.status}}Disponible{{else}}No disponible{{/if}}
+                    </span>
+                </p>
+                <p class="card-text">Categoría: {{this.category}}</p>
+                <p class="card-text"><small class="text-muted">Código: {{this.code}}</small></p>
+            </div>
+            <div class="card-footer">
+                <div class="d-grid gap-2">
+                    <a href="/products/{{this._id}}" class="btn btn-outline-primary">Ver detalles</a>
+                    <button class="btn btn-success add-to-cart" data-product-id="{{this._id}}">
+                        Agregar al carrito
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{/each}}
+</div>
+
+<!-- Paginación -->
+{{#if pagination.totalPages}}
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {{#unless pagination.hasPrevPage}}disabled{{/unless}}">
+            <a class="page-link" href="{{pagination.prevLink}}">Anterior</a>
+        </li>
+        
+        {{#each (range 1 pagination.totalPages)}}
+        <li class="page-item {{#if (eq this ../pagination.page)}}active{{/if}}">
+            <a class="page-link" href="?page={{this}}{{#if ../queryParams.limit}}&limit={{../queryParams.limit}}{{/if}}{{#if ../queryParams.sort}}&sort={{../queryParams.sort}}{{/if}}{{#if ../queryParams.query}}&query={{../queryParams.query}}{{/if}}{{#if ../queryParams.category}}&category={{../queryParams.category}}{{/if}}{{#if ../queryParams.availability}}&availability={{../queryParams.availability}}{{/if}}">
+                {{this}}
+            </a>
+        </li>
+        {{/each}}
+        
+        <li class="page-item {{#unless pagination.hasNextPage}}disabled{{/unless}}">
+            <a class="page-link" href="{{pagination.nextLink}}">Siguiente</a>
+        </li>
+    </ul>
+</nav>
+
+<div class="text-center mt-3">
+    <p class="text-muted">
+        Página {{pagination.page}} de {{pagination.totalPages}} - 
+        Total de productos: {{pagination.totalDocs}}
+    </p>
+</div>
+{{/if}}
+
+{{else}}
+<div class="alert alert-warning text-center" role="alert">
+    No hay productos disponibles con los filtros aplicados.
+</div>
+{{/if}}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Agregar productos al carrito
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', async function() {
+            const productId = this.getAttribute('data-product-id');
+            
+            try {
+                // Usar el cartId de la sesión
+                const cartId = '{{cartId}}'; // Esto viene del servidor
+                
+                if (!cartId) {
+                    alert('Error: No se pudo identificar tu carrito');
+                    return;
+                }
+
+                const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    alert('Producto agregado al carrito');
+                } else {
+                    const errorData = await response.json();
+                    alert('Error: ' + errorData.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al agregar producto al carrito');
+            }
+        });
+    });
+
+});
+</script>
